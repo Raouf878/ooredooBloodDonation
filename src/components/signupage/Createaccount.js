@@ -1,24 +1,29 @@
 import { StyleSheet, Text, TextInput, TouchableOpacity, View ,FlatList, Button,Image, ActivityIndicator} from 'react-native'
 import React from 'react'
-import tw from 'twrnc'
+import showToast from '../../utils/ToastMessage'
+import { useNavigation } from '@react-navigation/native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from "expo-font";
 import { useState } from 'react';
+import { useDispatch } from 'react-redux';
+import { setUserid } from '../../redux/slices/Credentials';
 import { FIREBASE_AUTH } from '../../../FirebaseConfig';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import Login from '../../screens/Login';
+import { doc, setDoc } from "firebase/firestore"; 
+import { db } from '../../../FirebaseConfig';
 const ooredooimage = require('../../assets/images/ooredoo.png');
 
 
 
 const Createaccount = () => {
+  const navigation=useNavigation();
+  const dispatch=useDispatch();
   const [fontsLoaded] = useFonts({
     "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
    
     
   });
-  if (!fontsLoaded) {
-      return <Text>Loading...</Text>;
-    }
    
     const [selectedBloodType, setSelectedBloodType] = useState(null);
     const [email,setEmail]=useState('');
@@ -31,10 +36,29 @@ const Createaccount = () => {
 
 
     const Signup=async()=>{
-      setLoading (true);
+      
+      
+      if (email && password && selectedBloodType && firstname && lastname && phonenumber){
+        setLoading (true);
       try {
-        const response = await createUserWithEmailAndPassword(auth,email,password)
-        console.log(response);
+        const {user} = await createUserWithEmailAndPassword(auth,email,password)
+        dispatch(setUserid(user.user.uid))
+      
+
+        if(user){
+          await setDoc(doc(db,'UsersData',user.uid), {
+            bloodType:selectedBloodType,
+            FirstName:firstname,
+            LastName:lastname,
+            PhoneNumber:phonenumber
+            
+           
+          });
+        }
+       
+
+      
+        
         
       } catch (error) {
         console.log(error);
@@ -44,6 +68,12 @@ const Createaccount = () => {
         setLoading(false)
 
       }
+
+      }else {
+        showToast('Olease fill out all the fields');
+
+      }
+      
     }
   return (
     
@@ -93,6 +123,7 @@ const Createaccount = () => {
         <Text style={[styles.bloodtext, { fontSize: 20 }]}>Sign Up</Text>
         </LinearGradient>
       </TouchableOpacity>
+      <Text style={[styles.footer_text, {textAlign:'center', paddingTop:10}]}>Already Have an account <Text style={{color:'black', textDecorationLine:'underline'}} onPress={()=>navigation.navigate(Login)}>Login</Text></Text>
       </>}
       <View style={styles.footer}>
         <Text style={styles.footer_text}>Powered By</Text>
@@ -149,7 +180,7 @@ const styles = StyleSheet.create({
   ooredooimage:{
     width:90,
     height:30,
-    marginTop: -10,
+    margin: -10,
     
 
   },

@@ -2,48 +2,58 @@ import { StyleSheet, Text, TextInput, TouchableOpacity, View ,Image, ActivityInd
 import React from 'react'
 import { useNavigation } from '@react-navigation/native';
 import tw from 'twrnc'
+import showToast from '../../utils/ToastMessage'
 import { LinearGradient } from 'expo-linear-gradient';
 import { useFonts } from "expo-font";
 import { useState } from 'react';
 import { FIREBASE_AUTH } from '../../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
+import { useDispatch,useSelector } from 'react-redux';
+import { setUserid } from '../../redux/slices/Credentials';
+import Signup from '../../screens/Signup';
 const ooredooimage = require('../../assets/images/ooredoo.png');
 
 
 
 const Loginaccount = () => {
+  const auth=FIREBASE_AUTH;
   const navigation=useNavigation();
+  const dispatch=useDispatch();
   const Signin=async()=>{
-    setLoading(true);
-    try {
-        const response=await signInWithEmailAndPassword(auth,email,password)
-        console.log(response);
-        
-    } catch (error) {
-        console.log(error);
-        
-    }
-    finally{
-        setLoading(false)
-    }
-  }
-  const [fontsLoaded] = useFonts({
-    "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
-   
     
-  });
+    if (email,password){
+      setLoading(true);
+      try {
+          const response=await signInWithEmailAndPassword(auth,email,password)
+          dispatch(setUserid(response.user.uid))
+          
+      } catch (error) {
+        showToast('Please check your email or password')
+          
+      }
+      finally{
+          setLoading(false)
+      }
+
+    }else{
+      showToast('Please fill out all the fields')
+
+    }
+   
+  }
+  
    
 
     const [email,setEmail]=useState('');
     const [password,setPassword]=useState('');
     const [loading, setLoading]=useState(false);
-    const auth=FIREBASE_AUTH;
+    
 
 
     
   return (
     
-    <View >
+    <View>
       <TextInput placeholder='Enter your email' style={styles.input} onChangeText={(text)=>setEmail(text)}></TextInput>
       <TextInput placeholder='Enter your password' style={styles.input}onChangeText={(text)=>setPassword(text)} secureTextEntry={true}></TextInput>
       { loading ? <ActivityIndicator size="large" color="#0000ff"/>

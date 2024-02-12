@@ -21,13 +21,29 @@
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
-      }
+      },
+      "package": "com.raouf21.ooredooBloodDonation"
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [ "expo-location",
+      {
+        "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."
+      }],
       "expo-font"
-    ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "242f87ea-cd98-448d-b3f1-72c700f887d6"
+      }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/242f87ea-cd98-448d-b3f1-72c700f887d6"
+    }
   }
 }

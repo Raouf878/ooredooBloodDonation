@@ -1,7 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
-import CredReducer from '../slices/Credentials'
+import  credentials from '../slices/Credentials'
 export const store=configureStore({
     reducer:{
-        credentials:CredReducer,
+        credentials,
     }
 })

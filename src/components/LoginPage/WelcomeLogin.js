@@ -31,7 +31,7 @@ const styles = StyleSheet.create({
       },
       instructions: {
         marginTop: 1,
-        fontSize: 20,
+        fontSize: 26,
         textAlign: 'center',
         fontFamily:'Rubik-Medium',
     
