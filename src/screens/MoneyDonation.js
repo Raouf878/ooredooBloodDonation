@@ -19,7 +19,6 @@ const DATA = [
     totalAmount: 15000,
     donatedAmount: 500,
   },
-  // Add more projects here if needed
 ];
 
 const renderItem = ({ item }) => (
