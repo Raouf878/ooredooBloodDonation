@@ -41,12 +41,12 @@ const Createaccount = () => {
       if (email && password && selectedBloodType && firstname && lastname && phonenumber){
         setLoading (true);
       try {
-        const {user} = await createUserWithEmailAndPassword(auth,email,password)
-        dispatch(setUserid(user.user.uid))
+        const response = await createUserWithEmailAndPassword(auth,email,password)
+        dispatch(setUserid(response.user.uid))
       
 
-        if(user){
-          await setDoc(doc(db,'UsersData',user.uid), {
+        if(response){
+          await setDoc(doc(db,'UsersData',response.user.uid), {
             bloodType:selectedBloodType,
             FirstName:firstname,
             LastName:lastname,

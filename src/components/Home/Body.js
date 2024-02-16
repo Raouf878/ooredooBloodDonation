@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity,ImageBackground } from 'react-native';
-import React from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity,ImageBackground,ActivityIndicator } from 'react-native';
+import React, { useEffect } from 'react';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientText from '../../utils/TextGradient';
@@ -8,32 +8,56 @@ import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import MapView from 'react-native-maps';
 import Svg, { Line, Rect } from 'react-native-svg';
+import { selectedFirstName,setFirstName,selectUserLoading } from '../../redux/slices/Credentials';
+import { useDispatch,useSelector } from 'react-redux';
+import { db } from '../../../FirebaseConfig';
+import { doc, getDoc } from "firebase/firestore";
+import { fetchUserData } from '../../redux/thunks/userHomeThunks';
 const bloodImg = require('../../assets/images/Donations/Blood donation-amico.png');
 const DonationsImg = require('../../assets/images/Donations/injury_3359179.png');
 const ooredooimage = require('../../assets/images/ooredoo.png');
 const ContributeMoney=require('../../assets/images/Donations/donate_7440975.png')
 const blooodrequest=require('../../assets/images/Donations/sos_7440980.png')
+import BloodRequest from '../../screens/BloodRequest';
+
+import { selectUserId } from '../../redux/slices/Credentials';
+
 
 import MoneyDonation from '../../screens/MoneyDonation'
 
+
 const Body = () => {
-  const navigation=useNavigation();
+
+ 
+  const navigation = useNavigation();
+  const dispatch = useDispatch();
+  const selectedUserIdd = useSelector(selectUserId);
+  const selectedUserFirstName = useSelector(selectedFirstName);
+  const userloading=useSelector(selectUserLoading)
+
+  useEffect(() => {
+    // Dispatch fetchUserData thunk action when the component mounts
+    dispatch(fetchUserData(selectedUserIdd));
+  }, [dispatch, selectedUserIdd]);
   
-  const getDashboardData=async()=>{
 
-
-  }
   const [fontsLoaded] = useFonts({
     "Rubik-Medium2": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
-    
   });
+
+  console.log('raouf',selectedUserFirstName);
+  console.log(selectedUserIdd);
+ 
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.requestContainer}>
         <View >
+        { userloading ? <ActivityIndicator size="large" color="#0000ff"/>
+      :<> 
         <GradientText style={styles.Hello}>
-            Hello,
+            Hello,{selectedUserFirstName}
         </GradientText>
+        </>}
           <Text style={{fontFamily:'Rubik-Medium2'}}>Please check new blood requests</Text>
           <GradientText style={{fontFamily:'Rubik-Medium2'}}>
             Donation requests {'>'}
@@ -44,7 +68,7 @@ const Body = () => {
         </View>
         </TouchableOpacity>
       <View style={{paddingTop:10, display:'flex',flexDirection:'row',justifyContent:'space-between' }}>
-      <TouchableOpacity style={styles.LineTwoBodyBlock}>
+      <TouchableOpacity style={styles.LineTwoBodyBlock} onPress={()=>navigation.navigate(BloodRequest)}>
         <LinearGradient
            colors={['#eb1a22','#e36f1e']} style={{height:'100%',borderRadius:15}}>
             

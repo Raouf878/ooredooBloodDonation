@@ -28,6 +28,12 @@
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
+      [
+        "@rnmapbox/maps",
+        {
+          "RNMapboxMapsDownloadToken": "pk.eyJ1IjoicmFvdWY5ODgiLCJhIjoiY2xzbjZtdGVqMDE0MDJscDlzbWl5ejE1bCJ9.J0gqgHQUt7suFKp8L2C7OQ"
+        }
+      ],
       [ "expo-location",
       {
         "locationAlwaysAndWhenInUsePermission": "Allow $(PRODUCT_NAME) to use your location."

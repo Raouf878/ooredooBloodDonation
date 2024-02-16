@@ -1,11 +1,13 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
+import Map from '../components/BloodRequests/Map'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 const BloodRequest = () => {
   return (
-    <View>
-      <Text>BloodRequest</Text>
-    </View>
+    <SafeAreaView>
+      <Map/>
+    </SafeAreaView>
   )
 }
 

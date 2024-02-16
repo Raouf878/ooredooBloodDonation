@@ -1,11 +1,17 @@
 import { StyleSheet, Text, View, Image,Permissions} from 'react-native'
 import React, { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
-import { add } from '@shopify/react-native-skia';
+import { useFonts } from 'expo-font';
 
 const profileimage = require('../../assets/images/Profile_Picture.png');
 
 const Header = () => {
+  const [fontsLoaded] = useFonts({
+    "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
+    "Rubik-Light": require("../../assets/fonts/Rubik-static/Rubik-Light.ttf"),
+   
+    
+  });
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
@@ -39,9 +45,9 @@ const Header = () => {
 
   return (
     <View style={styles.headerContainer}>
-      <View>
-      <Text style={{}}>Location</Text>
-      <Text>{address.formattedAddress}</Text>
+      <View >
+      <Text style={{fontFamily:'Rubik-Medium', fontSize:22}}>Location</Text>
+      <Text style={{fontFamily:'Rubik-Light'}}>{address.city}, {address.subregion}, {address.region}, {address.country}</Text>
       </View>
      
       <Image source={profileimage} style={styles.ooredooimage}></Image>
@@ -73,7 +79,7 @@ const styles = StyleSheet.create({
        
        display:'flex',
        flexDirection:'row',
-       alignItems:'flex-end',
+       alignItems:'center',
        justifyContent:'space-between',
         marginBottom:25,
        

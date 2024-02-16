@@ -9,6 +9,8 @@ import Home from "../screens/Home";
 import Login from "../screens/Login";
 import Signup from "../screens/Signup";
 import MoneyDonation from "../screens/MoneyDonation";
+import BloodRequest from "../screens/BloodRequest";
+import { CustomHeader } from "../components/HeaderMap/CustomHeader";
 
 
 const Stack=createNativeStackNavigator();
@@ -25,7 +27,17 @@ export default function AppNavigation(){
             <NavigationContainer>
             <Stack.Navigator initialRouteName="Home">
                 <Stack.Screen options={{headerShown:false}} name="Home" component={Home}/>
-                <Stack.Screen options={{headerShown:false}} name="MoneyDonation" component={MoneyDonation}/>
+                <Stack.Screen  name="MoneyDonation" options={{title:'',
+             headerShadowVisible: false,}} component={MoneyDonation}/>
+                <Stack.Screen
+        name="BloodRequest"
+        component={BloodRequest}
+        options={{
+          header: () => <CustomHeader />,
+          headerTransparent:true
+        }}
+      />
+                
                 
             </Stack.Navigator>
             </NavigationContainer>
@@ -35,7 +47,7 @@ export default function AppNavigation(){
             <NavigationContainer>
                 <Stack.Navigator initialRouteName="Login">
                 
-                <Stack.Screen options={{headerShown:false}} name="Home" component={Login}/>
+                <Stack.Screen options={{headerShown:false}} name="Login" component={Login}/>
                 <Stack.Screen options={{headerShown:false}} name="Signup" component={Signup}/>
 
                 </Stack.Navigator>

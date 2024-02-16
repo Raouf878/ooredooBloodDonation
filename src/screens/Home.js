@@ -13,7 +13,7 @@ import RecentActivity from '../components/Home/RecentActivity'
 const Home = () => {
   const id=useSelector(selectUserId)
   return (
-    <SafeAreaView style={[(tw`h-full w-full p-2 `),{backgroundColor:'#f8e4e4'}]}>
+    <SafeAreaView style={[(tw`h-full w-full p-2 `)/*,{backgroundColor:'#f8e4e4'}*/ ]}>
       <Header/>
       <Body/>
       <RecentActivity/>

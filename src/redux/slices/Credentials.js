@@ -1,5 +1,6 @@
 import { createSlice } from '@reduxjs/toolkit';
-
+import { db } from '../../../FirebaseConfig';
+import { doc,getDoc } from 'firebase/firestore';
 
 const initialState={
     useriddd:null,
@@ -42,5 +43,17 @@ export const selectedFirstName=(state)=>state.credentials.FirstName;
 export const selectedLastName=(state)=>state.credentials.LastName;
 export const selectedPhoneNumber=(state)=>state.credentials.PhoneNumber;
 export const selectUserId=(state)=>state.credentials.useriddd;
+export const selectUserLoading=(state)=>state.credentials.userLoading;
+export const listenForUserData = async (userId) => {
+    const docRef = doc(db, 'UsersData', userId);
+    const docSnap = await getDoc(docRef);
+    
+    if (docSnap.exists()) {
+      return docSnap.data(); // Return user data if document exists
+    } else {
+      return null; // Return null if document does not exist
+    }
+  };
+
 
 export default CredSlice.reducer

@@ -10,21 +10,31 @@ import { FIREBASE_AUTH } from '../../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useDispatch,useSelector } from 'react-redux';
 import { setUserid } from '../../redux/slices/Credentials';
+
 import Signup from '../../screens/Signup';
+
 const ooredooimage = require('../../assets/images/ooredoo.png');
 
 
 
 const Loginaccount = () => {
+  const [fontsLoaded] = useFonts({
+    "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
+   
+    
+  });
+  
   const auth=FIREBASE_AUTH;
   const navigation=useNavigation();
   const dispatch=useDispatch();
+
   const Signin=async()=>{
     
     if (email,password){
       setLoading(true);
       try {
           const response=await signInWithEmailAndPassword(auth,email,password)
+          
           dispatch(setUserid(response.user.uid))
           
       } catch (error) {
