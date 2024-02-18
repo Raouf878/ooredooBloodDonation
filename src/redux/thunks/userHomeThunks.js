@@ -6,7 +6,7 @@ import { setFirstName } from '../slices/Credentials';
 
 
 export const fetchUserData = createAsyncThunk(
-  'user/fetchUserData', // Action type
+  'user/fetchUserData',
   async (userId, { dispatch }) => {
     dispatch(setUserLoading(true));
 
@@ -15,8 +15,6 @@ export const fetchUserData = createAsyncThunk(
 
    
     dispatch(setFirstName(FirstName));
-
-    // Dispatch actions to indicate fetching completed
     dispatch(setUserLoading(false));
   }
 );

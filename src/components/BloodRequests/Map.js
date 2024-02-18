@@ -1,8 +1,9 @@
 import { StyleSheet, Text, View } from 'react-native'
 import React from 'react'
-import { CustomHeader } from '../HeaderMap/CustomHeader'
+import 'expo-dev-client';
 import Mapbox from '@rnmapbox/maps';
-Mapbox.setAccessToken('pk.eyJ1IjoicmFvdWY5ODgiLCJhIjoiY2xzbjZtdGVqMDE0MDJscDlzbWl5ejE1bCJ9.J0gqgHQUt7suFKp8L2C7OQ');
+
+Mapbox.setAccessToken('pk.eyJ1IjoicmFvdWY5ODgiLCJhIjoiY2xzbjZod3JnMDB0NTJxbzkwZm9oMXZvdCJ9.hZVOTvYRd5kEwvQqRILm3g');
 
 const Map = () => {
   return (
@@ -19,14 +20,18 @@ export default Map
 const styles = StyleSheet.create({
   page: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
+
+   
   },
+
   container: {
     height: 300,
+
     width: 300,
   },
+
   map: {
-    flex: 1
-  }
+    flex: 1,
+    zIndex:4
+  },
 })

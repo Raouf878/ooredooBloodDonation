@@ -36,7 +36,7 @@ const Body = () => {
   const userloading=useSelector(selectUserLoading)
 
   useEffect(() => {
-    // Dispatch fetchUserData thunk action when the component mounts
+    
     dispatch(fetchUserData(selectedUserIdd));
   }, [dispatch, selectedUserIdd]);
   

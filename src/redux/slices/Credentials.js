@@ -49,9 +49,9 @@ export const listenForUserData = async (userId) => {
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
-      return docSnap.data(); // Return user data if document exists
+      return docSnap.data()
     } else {
-      return null; // Return null if document does not exist
+      return null;
     }
   };
 
