@@ -2,10 +2,13 @@ import { StyleSheet, Text, View, Image,Permissions} from 'react-native'
 import React, { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { useFonts } from 'expo-font';
+import { useDispatch } from 'react-redux';
+import { setUserLat,setUserLon } from '../../redux/slices/Location';
 
 const profileimage = require('../../assets/images/Profile_Picture.png');
 
 const Header = () => {
+ const dispatch=useDispatch();
   const [fontsLoaded] = useFonts({
     "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
     "Rubik-Light": require("../../assets/fonts/Rubik-static/Rubik-Light.ttf"),
@@ -27,8 +30,8 @@ const Header = () => {
 
         let locationData = await Location.getCurrentPositionAsync({});
         setLocation(locationData);
-
-        // Reverse geocoding
+        setUserLat(dispatch(setUserLat(locationData.coords.latitude)))
+        setUserLon(dispatch(setUserLon(locationData.coords.longitude)))
         let geocode = await Location.reverseGeocodeAsync({
           latitude: locationData.coords.latitude,
           longitude: locationData.coords.longitude,
@@ -81,7 +84,7 @@ const styles = StyleSheet.create({
        flexDirection:'row',
        alignItems:'center',
        justifyContent:'space-between',
-        marginBottom:25,
+       marginBottom:25,
        
         
       }

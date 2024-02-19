@@ -27,13 +27,11 @@ export const CustomHeader = () => {
       }}
       
       />
+      </View>
       
-    </View>
-    <View style={styles.page}>
-    <View style={styles.containerr}>
-      <Mapbox.MapView style={styles.map} />
-    </View>
-  </View>
+   
+   
+  
     </SafeAreaView>
   );
 };
