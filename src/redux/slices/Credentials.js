@@ -8,7 +8,7 @@ const initialState={
     LastName:null,
     PhoneNumber:null,
     BloodType:null,
-    userLoading:false,
+    loadingStates: [false, false, false],
 
 }
 export const CredSlice = createSlice({
@@ -34,22 +34,29 @@ export const CredSlice = createSlice({
         },
         setBloodType:(state,action)=>{
             state.BloodType=action.payload;
-        }
+        },
+        setLoadingState: (state, action) => {
+            state.loadingStates[action.payload.index] = action.payload.loadingState;
+          },
     },
 })
-export const {setFirstName,setLastName,setPhoneNumber,setBloodType,setUser,setUserLoading,setUserid}=CredSlice.actions;
+export const {setFirstName,setLastName,setPhoneNumber,setBloodType,setUser,setUserLoading,setUserid,setLoadingState}=CredSlice.actions;
 export const selectedBloodType=(state)=>state.credentials.BloodType;
 export const selectedFirstName=(state)=>state.credentials.FirstName;
 export const selectedLastName=(state)=>state.credentials.LastName;
 export const selectedPhoneNumber=(state)=>state.credentials.PhoneNumber;
 export const selectUserId=(state)=>state.credentials.useriddd;
 export const selectUserLoading=(state)=>state.credentials.userLoading;
+export const selectLoadingStates = (state) => state.credentials.loadingStates;
 export const listenForUserData = async (userId) => {
+    
     const docRef = doc(db, 'UsersData', userId);
     const docSnap = await getDoc(docRef);
     
     if (docSnap.exists()) {
+     
       return docSnap.data()
+      
     } else {
       return null;
     }

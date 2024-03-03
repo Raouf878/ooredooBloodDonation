@@ -1,4 +1,5 @@
 import Toast from 'react-native-root-toast';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default showToast = (message) => {
 

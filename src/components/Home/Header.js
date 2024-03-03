@@ -1,9 +1,12 @@
-import { StyleSheet, Text, View, Image,Permissions} from 'react-native'
+import { StyleSheet, Text, View, Image,Permissions,ActivityIndicator} from 'react-native'
 import React, { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { useFonts } from 'expo-font';
-import { useDispatch } from 'react-redux';
+import { useDispatch,useSelector } from 'react-redux';
 import { setUserLat,setUserLon } from '../../redux/slices/Location';
+import CircleSkeleton from '../Skeletons/CircleSkeleton';
+import { Avatar } from "native-base";
+import { selectedFirstName,selectUserLoading,selectLoadingStates,setLoadingState } from '../../redux/slices/Credentials';
 
 const profileimage = require('../../assets/images/Profile_Picture.png');
 
@@ -18,6 +21,9 @@ const Header = () => {
   const [location, setLocation] = useState(null);
   const [address, setAddress] = useState('');
   const [errorMsg, setErrorMsg] = useState(null);
+  const name=useSelector(selectedFirstName)
+  const loadingStates = useSelector(selectLoadingStates);
+const userloading=useSelector(selectUserLoading)
 
   useEffect(() => {
     (async () => {
@@ -38,7 +44,7 @@ const Header = () => {
         });
 
         setAddress(geocode[0]);
-        console.log(geocode[0]); // Assuming the first result is the most accurate
+        dispatch(setLoadingState({ index: 0, loadingState: true }));
       } catch (error) {
         console.error('Error getting location:', error);
         setErrorMsg('Error getting location');
@@ -53,7 +59,18 @@ const Header = () => {
       <Text style={{fontFamily:'Rubik-Light'}}>{address.city}, {address.subregion}, {address.region}, {address.country}</Text>
       </View>
      
-      <Image source={profileimage} style={styles.ooredooimage}></Image>
+      {userloading ? (
+  <CircleSkeleton/>
+) : (
+  <Avatar bg="indigo.500" mr="1">
+    {name && name.length >= 2 ? (
+      name[0] + name[1]
+    ) : (
+      name && name[0]
+    )}
+  </Avatar>
+)}
+      
       
       
     </View>

@@ -10,6 +10,7 @@ import { FIREBASE_AUTH } from '../../../FirebaseConfig';
 import { createUserWithEmailAndPassword, signInWithEmailAndPassword } from 'firebase/auth';
 import { useDispatch,useSelector } from 'react-redux';
 import { setUserid } from '../../redux/slices/Credentials';
+import { RubikMediumFont } from '../../utils/Fontexporter';
 
 import Signup from '../../screens/Signup';
 
@@ -18,12 +19,8 @@ const ooredooimage = require('../../assets/images/ooredoo.png');
 
 
 const Loginaccount = () => {
-  const [fontsLoaded] = useFonts({
-    "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
-   
-    
-  });
   
+  RubikMediumFont()
   const auth=FIREBASE_AUTH;
   const navigation=useNavigation();
   const dispatch=useDispatch();

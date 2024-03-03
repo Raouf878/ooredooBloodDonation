@@ -16,5 +16,7 @@ export const fetchUserData = createAsyncThunk(
    
     dispatch(setFirstName(FirstName));
     dispatch(setUserLoading(false));
+
+    console.log('Myyyyyyyyyyyyyy FirstNaem    ',FirstName);
   }
 );

@@ -12,7 +12,7 @@ const TruncatedText = ({ text, maxLength }) => {
   const buttonText = showFullText ? 'Show Less' : 'Show More';
 
   return (
-    <View>
+    <View style={{zIndex:50}}>
       <Text style={styles.description}>{truncatedText}</Text>
       {text.length > maxLength && (
         <TouchableOpacity onPress={toggleText}>

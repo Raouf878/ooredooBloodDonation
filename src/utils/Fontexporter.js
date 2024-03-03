@@ -8,3 +8,10 @@ export const RubikMediumFont = () => {
 
   return loaded;
 };
+export const RubikLightFont = () => {
+  const [loaded] = useFonts({
+    "Rubik-Light": require("../assets/fonts/Rubik-static/Rubik-Light.ttf"),
+  });
+
+  return loaded;
+};

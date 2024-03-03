@@ -10,6 +10,7 @@ import Login from "../screens/Login";
 import Signup from "../screens/Signup";
 import MoneyDonation from "../screens/MoneyDonation";
 import BloodRequest from "../screens/BloodRequest";
+import BloodRequestNearby from "../screens/BloodRequestNearby";
 import { CustomHeader } from "../components/HeaderMap/CustomHeader";
 
 
@@ -20,6 +21,7 @@ export default function AppNavigation(){
     const dispatch=useDispatch()
     
     onAuthStateChanged(FIREBASE_AUTH,u=>{
+        console.log(u.uid);
         dispatch(setUserid(u.uid));
     })
     if(credentials){
@@ -33,10 +35,13 @@ export default function AppNavigation(){
         name="BloodRequest"
         component={BloodRequest}
         options={{
-          header: () => <CustomHeader />,
+          title:'',
           headerTransparent:true
         }}
+        
       />
+      <Stack.Screen options={{ title:'',
+          headerTransparent:true}} name="BloodRequestNearby" component={BloodRequestNearby}/>
                 
                 
             </Stack.Navigator>

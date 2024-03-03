@@ -1,5 +1,7 @@
-import { StyleSheet, Text, View, Image, TouchableOpacity,ImageBackground,ActivityIndicator } from 'react-native';
-import React, { useEffect } from 'react';
+import { StyleSheet, Text, View, Image, TouchableOpacity,ImageBackground,ActivityIndicator,ScrollView } from 'react-native';
+import { addDoc, collection, query, where, onSnapshot } from 'firebase/firestore'
+import { db } from '../../../FirebaseConfig'
+import React, { useEffect,useState } from 'react';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientText from '../../utils/TextGradient';
@@ -8,10 +10,12 @@ import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
 import MapView from 'react-native-maps';
 import Svg, { Line, Rect } from 'react-native-svg';
-import { selectedFirstName,setFirstName,selectUserLoading } from '../../redux/slices/Credentials';
+import { selectedFirstName,setFirstName,selectUserLoading,selectLoadingStates,setLoadingState } from '../../redux/slices/Credentials';
 import { useDispatch,useSelector } from 'react-redux';
-import { db } from '../../../FirebaseConfig';
-import { doc, getDoc } from "firebase/firestore";
+import HomeSkeleton from '../Skeletons/HomeSkeleton';
+
+
+
 import { fetchUserData } from '../../redux/thunks/userHomeThunks';
 const bloodImg = require('../../assets/images/Donations/Blood donation-amico.png');
 const DonationsImg = require('../../assets/images/Donations/injury_3359179.png');
@@ -19,21 +23,26 @@ const ooredooimage = require('../../assets/images/ooredoo.png');
 const ContributeMoney=require('../../assets/images/Donations/donate_7440975.png')
 const blooodrequest=require('../../assets/images/Donations/sos_7440980.png')
 import BloodRequest from '../../screens/BloodRequest';
+import BloodRequestNearby from '../../screens/BloodRequestNearby';
+import { RubikMediumFont,RubikLightFont } from '../../utils/Fontexporter'
 
 import { selectUserId } from '../../redux/slices/Credentials';
 
 
 import MoneyDonation from '../../screens/MoneyDonation'
+import  Boxx  from '../Box/Boxx';
 
 
 const Body = () => {
 
- 
+  RubikMediumFont();
   const navigation = useNavigation();
   const dispatch = useDispatch();
   const selectedUserIdd = useSelector(selectUserId);
   const selectedUserFirstName = useSelector(selectedFirstName);
+  const [bloodrequests, setBloodrequests] = useState([])
   const userloading=useSelector(selectUserLoading)
+const [DonationDataLoading,setDonationdataloading]=useState(true)
 
   useEffect(() => {
     
@@ -41,25 +50,42 @@ const Body = () => {
   }, [dispatch, selectedUserIdd]);
   
 
-  const [fontsLoaded] = useFonts({
-    "Rubik-Medium2": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
-  });
+  useEffect(() => {
+    const q = query(collection(db, "BloodRequests"), where("DonatedUser", "==", `${selectedUserIdd}`));
+    const unsubscribe = onSnapshot(q, (querySnapshot) => {
+      const requests = [];
+      querySnapshot.forEach((doc) => {
+        const requestData = {
+          id: doc.id,
+          data: doc.data()
+        };
+        requests.push(requestData);
+      });
+      setBloodrequests(requests);
+      console.log(requests);
+      setDonationdataloading(false)
+    });
+  
+    // Cleanup function
+    return () => unsubscribe();
+  }, []); // Empty dependency array to ensure it runs only once on component mount
+  
 
   console.log('raouf',selectedUserFirstName);
   console.log(selectedUserIdd);
  
   return (
     <View style={styles.container}>
-      <TouchableOpacity style={styles.requestContainer}>
+      <TouchableOpacity style={styles.requestContainer} onPress={()=>navigation.navigate(BloodRequestNearby)}>
         <View >
-        { userloading ? <ActivityIndicator size="large" color="#0000ff"/>
+        { userloading ? <HomeSkeleton/>
       :<> 
         <GradientText style={styles.Hello}>
             Hello,{selectedUserFirstName}
         </GradientText>
         </>}
-          <Text style={{fontFamily:'Rubik-Medium2'}}>Please check new blood requests</Text>
-          <GradientText style={{fontFamily:'Rubik-Medium2'}}>
+          <Text style={{fontFamily:'Rubik-Medium'}}>Please check new blood requests</Text>
+          <GradientText style={{fontFamily:'Rubik-Medium'}}>
             Donation requests {'>'}
         </GradientText>
         </View>
@@ -70,7 +96,7 @@ const Body = () => {
       <View style={{paddingTop:10, display:'flex',flexDirection:'row',justifyContent:'space-between' }}>
       <TouchableOpacity style={styles.LineTwoBodyBlock} onPress={()=>navigation.navigate(BloodRequest)}>
         <LinearGradient
-           colors={['#eb1a22','#e36f1e']} style={{height:'100%',borderRadius:15}}>
+           colors={['#eb1a22','#e36f1e']} style={{height:150,borderRadius:15}}>
             
         <View style={styles.redContainerFlex}>
           {/* 
@@ -78,11 +104,11 @@ const Body = () => {
           <Image source={DonationsImg} style={styles.DonationsImg}></Image>
         </View>
         */}
-        <View style={{justifyContent:'center',alignItems:'flex-start',padding:7}}>
+        <View style={{flex:1,justifyContent:'center',alignItems:'flex-start',padding:7,position:'absolute'}}>
           {/*this section is for red container text */}
-          <Text style={{fontFamily:'Rubik-Medium2', fontSize:34, color:'white',}}>+</Text>
-          <Text style={{fontFamily:'Rubik-Medium2',fontSize:18, color:'white'}}>Need Blood?</Text>
-          <Text style={{fontFamily:'Rubik-Medium2'}}>Make a request for nearby donors {'>'}</Text>
+          <Text style={{fontFamily:'Rubik-Medium', fontSize:34, color:'white',}}>+</Text>
+          <Text style={{fontFamily:'Rubik-Medium',fontSize:18, color:'white'}}>Need Blood?</Text>
+          <Text style={{fontFamily:'Rubik-Medium'}}>Make a request for nearby donors {'>'}</Text>
         </View>
         </View>
         </LinearGradient>
@@ -90,19 +116,34 @@ const Body = () => {
         
         
         <TouchableOpacity style={[styles.LineTwoBodyBlock,{backgroundColor:'white'}]} onPress={()=>navigation.navigate(MoneyDonation)}>
-        <View style={{justifyContent:'center',alignItems:'flex-start',padding:7}}>
+        <View style={{flex:1,justifyContent:'center',alignItems:'flex-start',padding:7}}>
         
           {/*this section is for red container text */}
           <Image source={ContributeMoney} style={styles.contributeImage}></Image>
-          <GradientText style={{fontFamily:'Rubik-Medium2',fontSize:18, color:'black'}}>Donate Money</GradientText>
-          <Text style={{fontFamily:'Rubik-Medium2'}}>we need your funding for some projects {'>'}</Text>
+          <GradientText style={{fontFamily:'Rubik-Medium',fontSize:18, color:'black'}}>Donate Money</GradientText>
+          <Text style={{fontFamily:'Rubik-Medium'}}>we need your funding for some projects {'>'}</Text>
         </View>
         </TouchableOpacity>
         
         {/* Additional Views */}
       </View>
-      <View>
-       {/* Additional Views for the nearby requests */}
+      <View style={{borderWidth:1,borderColor:'black',flex:1,borderRadius:15,marginTop:15}}>
+        <View style={{margin:8}}>
+        <Text style={{fontFamily:'Rubik-Medium',fontSize:24}}>Recent Donations</Text>
+       
+        </View>
+
+        <ScrollView>
+        { DonationDataLoading ? <ActivityIndicator size="small" color="grey" />
+      :<> 
+        <View style={{padding:10}}>
+        <Boxx data={bloodrequests} CancelStyle={{flex:1,flexDirection:'row'}} CancelText={'Cancel Donation X'}/>
+        
+        </View>
+        </>}
+        </ScrollView>
+        
+       
        
       
        
@@ -142,6 +183,7 @@ const styles = StyleSheet.create({
     
     
     
+    
   },
   bloodImg: {
     width: '100%',
@@ -150,7 +192,7 @@ const styles = StyleSheet.create({
   },
   Hello:{
     fontSize:25,
-    fontFamily:'Rubik-Medium2'
+    fontFamily:'Rubik-Medium'
 
   },
   requestContainer: {
@@ -175,7 +217,7 @@ const styles = StyleSheet.create({
   LineTwoBodyBlock:{
     width:'49%',
     borderRadius:15,
-    minHeight:100,
+    minHeight:150,
     maxHeight:'48%',
     backgroundColor:'black',
     elevation: 5,
@@ -197,6 +239,7 @@ const styles = StyleSheet.create({
   redContainerFlex:{
     display:'flex',
     flexDirection:'column',
+    
    
   },
   

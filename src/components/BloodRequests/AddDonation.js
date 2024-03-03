@@ -1,44 +1,143 @@
-import { StyleSheet, Text, View,TextInput } from 'react-native'
-import React,{useState} from 'react'
-import {RubikMediumFont} from '../../utils/Fontexporter'
+import { StyleSheet, Text, View, TextInput } from 'react-native';
+import React, { useState, useEffect } from 'react';
+import { RubikMediumFont } from '../../utils/Fontexporter';
 import BloodTypePicker from '../BloodPicker/BloodPicker';
+import { useSelector } from 'react-redux';
+import * as Location from 'expo-location';
+import { useNavigation } from '@react-navigation/native';
+import { useFonts } from 'expo-font';
+import { db,initializeApp } from '../../../FirebaseConfig';
+import { getUserSearchLon, getUserSrachLat } from '../../redux/slices/Location';
+import showToast from '../../utils/ToastMessage'
+import CustomButton from '../Buttons/GradientButton';
+import { selectUserId } from '../../redux/slices/Credentials';
+import { GeoPoint } from 'firebase/firestore';
+import {addDoc, collection,query, where, onSnapshot} from 'firebase/firestore'
+import { ActivityIndicator } from 'react-native';
+import BloodRequest from '../../screens/BloodRequest';
+import {geohashForLocation} from 'geofire-common';
+
 
 const AddDonation = () => {
-  const [firstname, setFirstname] = useState('');
+ 
   const [selectedBloodType, setSelectedBloodType] = useState(null);
+  const [name,setName]=useState('')
   const isFontLoaded = RubikMediumFont();
-  const Geocode=()=>{
-    try{
-    let geocode = await Location.reverseGeocodeAsync({
-      latitude: locationData.coords.latitude,
-      longitude: locationData.coords.longitude,
-    });
-
-    setAddress(geocode[0]);
-    console.log(geocode[0]); // Assuming the first result is the most accurate
-  } catch (error) {
-    console.error('Error getting location:', error);
-    setErrorMsg('Error getting location');
-  }
-})();
-}, []);
+  const userlon = useSelector(getUserSearchLon);
+  const userlat = useSelector(getUserSrachLat);
+  const [location, setLocation] = useState(null);
+  const [address, setAddress] = useState('');
+  const [errorMsg, setErrorMsg] = useState(null);
+  const [hash,setHash]=useState('')
+  const [loading, setLoading] = useState(false);
+  const userid=useSelector(selectUserId)
+  const [bloodrequest,setBloodrequests]=useState([])
   
+  
+
+  const SaveDataFireBase =  async() => {
+    
+    if(selectedBloodType && userlat && userlon &&  name ){
+      setLoading(true)
+
+      
+    
+      
+await addDoc(collection(db,'BloodRequests'),{
+  lat:userlat,
+  lon:userlon,
+  NeededBloodType: selectedBloodType,
+  PatientName: name,
+  UserId: userid,
+  Status:'Waiting',
+  LocaHash:hash
+  
+}).then(()=>{
+  showToast('Request sent successfully')
+  setName('')
+  
+ 
+  setLoading(false)
+ 
+})
+.catch((error)=>{
+  console.log(error);
+  showToast('error while adding user')
+})
+  
+  
+
+
+    }
+    else{
+      showToast('Please fill out all the fields');
+
+    }
+  }
+  
+  
+  
+ 
+ 
+
+  useEffect(() => {
+    (async () => {
+     
+      if(userlat && userlon){
+        try {
+          const newhash=geohashForLocation([userlon,userlat])
+        setHash(newhash)
+          console.log(newhash);
+   
+           let geocode = await Location.reverseGeocodeAsync({
+             latitude: userlat,
+             longitude: userlon,
+           });
+   
+           // Convert address object to string
+           const formattedAddress = `${geocode[0].formattedAddress}`;
+           setAddress(formattedAddress);
+           // Assuming the first result is the most accurate
+         } catch (error) {
+           console.error('Error getting location:', error);
+           setErrorMsg('Error getting location');
+         }
+      }else{
+        return null;
+      }
+     
+    })();
+  });
+
   return (
     <View style={styles.container}>
-    <View >
-      <Text style={{fontFamily:"Rubik-Medium",fontSize:20,textAlign:'center'}}>Please fill out the patient information</Text>
-      <Text style={{fontFamily:"Rubik-Medium",fontSize:10,textAlign:'center',color:'grey'}}>To update the status of your previous orders, hold click their marker</Text>
+      <View>
+        <Text style={{ fontFamily: 'Rubik-Medium', fontSize: 20, textAlign: 'center' }}>Please fill out the patient information</Text>
+        <Text style={{ fontFamily: 'Rubik-Medium', fontSize: 10, textAlign: 'center', color: 'grey' }}>To update the status of your previous orders, hold click their marker</Text>
+      </View>
+      <View>
+        <TextInput placeholder="Enter your first name" style={styles.input} value={name}onChangeText={(text) => setName(text)} />
+        <TextInput placeholder="Pick your address" style={styles.input} value={address}  /> 
+        <BloodTypePicker data={itemData} selectedBloodType={selectedBloodType} onSelectBloodType={setSelectedBloodType} />
+      </View>
+      <View style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
+      { loading ? <ActivityIndicator size="large" color="#0000ff"/>
+      :<> 
+      <CustomButton
+                  buttonText="Send Request"
+                  colors={['#e36f1e', '#eb1a22']}
+                  buttonStyle={styles.signup}
+                  textStyle={styles.bloodtext}
+                  onPress={SaveDataFireBase} // Pass togglePopup function as onPress prop
+                />
+                </>}
+                </View>
     </View>
-    <View >
-    <TextInput placeholder="Enter your first name" style={styles.input} onChangeText={(text) => setFirstname(text)} />
-    <TextInput placeholder="Pick your address" style={styles.input} onChangeText={(text) => setFirstname(text)} />
-    <BloodTypePicker data={itemData} selectedBloodType={selectedBloodType} onSelectBloodType={setSelectedBloodType} />
-    </View>
-    </View>
-  )
+  );
 }
 
-export default AddDonation 
+export default AddDonation;
+
 const itemData = [
   { type: 'A+' },
   { type: 'A-' },
@@ -51,23 +150,29 @@ const itemData = [
 ];
 
 const styles = StyleSheet.create({
-    container:{
-        borderTopLeftRadius:15,
-        borderTopRightRadius:15,
-        backgroundColor:'white',
-        height:'100%',
-        padding:10
-        
-    },
-    input: {
-      width: '100%',
-      height: 35,
-      borderColor: 'gray',
-      borderWidth: 1,
-      marginTop: 10,
-      paddingHorizontal: 20,
-      backgroundColor: 'white',
-      borderRadius: 5,
-      fontFamily: 'Rubik-Medium',
-    }
-})
+  container: {
+    borderTopLeftRadius: 15,
+    borderTopRightRadius: 15,
+    backgroundColor: 'white',
+    height: '100%',
+    padding: 10
+  },
+  input: {
+    width: '100%',
+    height: 35,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 10,
+    paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    fontFamily: 'Rubik-Medium',
+  },
+  bloodtext:{
+    fontFamily:'Rubik-Medium'
+  },
+  signup:{
+    width:'50%',
+    
+  }
+});
