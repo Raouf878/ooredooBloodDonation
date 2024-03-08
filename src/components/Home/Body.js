@@ -5,17 +5,10 @@ import React, { useEffect,useState } from 'react';
 import MaskedView from '@react-native-masked-view/masked-view';
 import { LinearGradient } from 'expo-linear-gradient';
 import GradientText from '../../utils/TextGradient';
-import { useFonts } from "expo-font";
-import * as Location from 'expo-location';
 import { useNavigation } from '@react-navigation/native';
-import MapView from 'react-native-maps';
-import Svg, { Line, Rect } from 'react-native-svg';
 import { selectedFirstName,setFirstName,selectUserLoading,selectLoadingStates,setLoadingState } from '../../redux/slices/Credentials';
 import { useDispatch,useSelector } from 'react-redux';
 import HomeSkeleton from '../Skeletons/HomeSkeleton';
-
-
-
 import { fetchUserData } from '../../redux/thunks/userHomeThunks';
 const bloodImg = require('../../assets/images/Donations/Blood donation-amico.png');
 const DonationsImg = require('../../assets/images/Donations/injury_3359179.png');
@@ -43,7 +36,20 @@ const Body = () => {
   const [bloodrequests, setBloodrequests] = useState([])
   const userloading=useSelector(selectUserLoading)
 const [DonationDataLoading,setDonationdataloading]=useState(true)
-
+const onButtonPress=async()=>{
+  const documentId = this.boxx.key
+  console.log(documentId);
+  const documentRef = doc(db,'BloodRequests',documentId)
+  const newData = {
+    DonatedUser:`${userid}`
+  };
+  try {
+    await updateDoc(documentRef, newData);
+    console.log("Document successfully updated!");
+  } catch (error) {
+    console.error("Error updating document: ", error);
+  }
+}
   useEffect(() => {
     
     dispatch(fetchUserData(selectedUserIdd));
@@ -65,24 +71,19 @@ const [DonationDataLoading,setDonationdataloading]=useState(true)
       console.log(requests);
       setDonationdataloading(false)
     });
-  
-    // Cleanup function
     return () => unsubscribe();
-  }, []); // Empty dependency array to ensure it runs only once on component mount
-  
-
-  console.log('raouf',selectedUserFirstName);
-  console.log(selectedUserIdd);
- 
+  }, [])
   return (
     <View style={styles.container}>
       <TouchableOpacity style={styles.requestContainer} onPress={()=>navigation.navigate(BloodRequestNearby)}>
         <View >
         { userloading ? <HomeSkeleton/>
       :<> 
+      
         <GradientText style={styles.Hello}>
             Hello,{selectedUserFirstName}
         </GradientText>
+        
         </>}
           <Text style={{fontFamily:'Rubik-Medium'}}>Please check new blood requests</Text>
           <GradientText style={{fontFamily:'Rubik-Medium'}}>
@@ -137,7 +138,7 @@ const [DonationDataLoading,setDonationdataloading]=useState(true)
         { DonationDataLoading ? <ActivityIndicator size="small" color="grey" />
       :<> 
         <View style={{padding:10}}>
-        <Boxx data={bloodrequests} CancelStyle={{flex:1,flexDirection:'row'}} CancelText={'Cancel Donation X'}/>
+        <Boxx data={bloodrequests} CancelText={'Cancel Donation X'} buttonStyle={styles.signup} textStyle={styles.bloodtext} ButtonColors={['#eb1a22','#e36f1e']} />
         
         </View>
         </>}
@@ -156,6 +157,9 @@ const [DonationDataLoading,setDonationdataloading]=useState(true)
 export default Body;
 
 const styles = StyleSheet.create({
+  cancelStyle:{
+    flex:1,flexDirection:'row'
+  },
   additionalContainer: {
     marginTop:-125,
     backgroundColor: 'white',
@@ -192,7 +196,8 @@ const styles = StyleSheet.create({
   },
   Hello:{
     fontSize:25,
-    fontFamily:'Rubik-Medium'
+    fontFamily:'Rubik-Medium',
+    
 
   },
   requestContainer: {
@@ -213,6 +218,14 @@ const styles = StyleSheet.create({
   imageContainer: {
     width: 100,
     height: 90,
+  },
+  bloodtext:{
+    fontFamily:'Rubik-Medium'
+  },
+  signup:{
+    marginTop:10
+    
+    
   },
   LineTwoBodyBlock:{
     width:'49%',

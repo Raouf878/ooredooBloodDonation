@@ -1,4 +1,4 @@
-import React from 'react';
+import React,{useState,useRef,useEffect} from 'react';
 import { Provider } from 'react-redux';
 import { store } from './src/redux/store/store'
 import AppNavigation from './src/navigation/appNavigation';
@@ -8,6 +8,7 @@ import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 
 function App() {
+
   window.navigator.userAgent = "ReactNative";
   const theme=extendTheme({
     components:{

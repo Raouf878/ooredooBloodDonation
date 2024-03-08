@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image,ActivityIndicator } from 'react-native';
+import React, { useState,useEffect } from 'react';
+import { View, TextInput, TouchableOpacity, Text, StyleSheet, Image,ActivityIndicator,Platform } from 'react-native';
 import { LinearGradient } from 'expo-linear-gradient';
 import { useNavigation } from '@react-navigation/native';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
@@ -13,6 +13,10 @@ import { useFonts } from "expo-font";
 import BloodTypePicker from '../BloodPicker/BloodPicker'// Import the BloodTypePicker component
 import ooredooimage from '../../assets/images/ooredoo.png';
 import Login from '../../screens/Login'
+import * as Device from 'expo-device';
+
+import Constants from 'expo-constants';
+import * as Notifications from 'expo-notifications';
 
 const Createaccount = () => {
   const navigation = useNavigation();
@@ -20,6 +24,7 @@ const Createaccount = () => {
   const [fontsLoaded] = useFonts({
     'Rubik-Medium': require('../../assets/fonts/Rubik-static/Rubik-Medium.ttf'),
   });
+  
 
   const [selectedBloodType, setSelectedBloodType] = useState(null);
   const [email, setEmail] = useState('');
@@ -28,8 +33,42 @@ const Createaccount = () => {
   const [password, setPassword] = useState('');
   const [phonenumber, setPhonenumber] = useState('');
   const [loading, setLoading] = useState(false);
+  const [expopushtoken,setExpoPushToken]=useState('')
   const auth = FIREBASE_AUTH;
-
+  async function registerForPushNotificationsAsync() {
+    let token;
+  
+    if (Platform.OS === 'android') {
+      Notifications.setNotificationChannelAsync('default', {
+        name: 'default',
+        importance: Notifications.AndroidImportance.MAX,
+        vibrationPattern: [0, 250, 250, 250],
+        lightColor: '#FF231F7C',
+      });
+    }
+  
+    if (Device.isDevice) {
+      const { status: existingStatus } = await Notifications.getPermissionsAsync();
+      let finalStatus = existingStatus;
+      if (existingStatus !== 'granted') {
+        const { status } = await Notifications.requestPermissionsAsync();
+        finalStatus = status;
+        console.log('edllplsldlspldppsldplpsl');
+      }
+      if (finalStatus !== 'granted') {
+        alert('Failed to get push token for push notification!');
+        return;
+      }
+      token = await Notifications.getExpoPushTokenAsync({
+        projectId: Constants.expoConfig.extra.eas.projectId,
+      });
+      console.log(token);
+    } else {
+      alert('Must use physical device for Push Notifications');
+    }
+    
+    setExpoPushToken(token.data)
+  }
   const Signup = async () => {
     if (email && password && selectedBloodType && firstname && lastname && phonenumber) {
       setLoading(true);
@@ -43,6 +82,7 @@ const Createaccount = () => {
             FirstName: firstname,
             LastName: lastname,
             PhoneNumber: phonenumber,
+            PushToke:expopushtoken
           });
         }
       } catch (error) {
@@ -54,6 +94,9 @@ const Createaccount = () => {
       showToast('Please fill out all the fields');
     }
   };
+  useEffect(() => {
+    registerForPushNotificationsAsync();
+  }, []);
 
   return (
     <View>

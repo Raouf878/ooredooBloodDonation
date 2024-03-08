@@ -12,10 +12,13 @@ import showToast from '../../utils/ToastMessage'
 import CustomButton from '../Buttons/GradientButton';
 import { selectUserId } from '../../redux/slices/Credentials';
 import { GeoPoint } from 'firebase/firestore';
-import {addDoc, collection,query, where, onSnapshot} from 'firebase/firestore'
+import {addDoc, collection,query, where, onSnapshot,getDocs} from 'firebase/firestore'
 import { ActivityIndicator } from 'react-native';
 import BloodRequest from '../../screens/BloodRequest';
 import {geohashForLocation} from 'geofire-common';
+import { SafeAreaView } from 'react-native-safe-area-context';
+import getCompatibleBloodTypes from '../../utils/BloodCompt';
+import * as Notifications from 'expo-notifications';
 
 
 const AddDonation = () => {
@@ -31,10 +34,76 @@ const AddDonation = () => {
   const [hash,setHash]=useState('')
   const [loading, setLoading] = useState(false);
   const userid=useSelector(selectUserId)
+  const [CompatibleBloodTypes,setCompatibleBloodType]=useState([])
   const [bloodrequest,setBloodrequests]=useState([])
+  const [AllPushTokens,setAllPushTokens]=useState([])
   
   
+  const sendNotificationToAll = async () => {
+    try {
+      const comptValues=await getCompatibleBloodTypes(selectedBloodType)
+      console.log(comptValues);
+      const querySnapshot = await getDocs(query(collection(db, 'UsersData'), where('bloodType', 'in', comptValues)));
+     console.log(querySnapshot);
+      // Extract push tokens from the documents
+      const pushTokens = [];
+      querySnapshot.forEach((doc) => {
+        const pushToken = doc.data().PushToke;
+        console.log(pushToken);
+        if (pushToken) {
+          pushTokens.push(pushToken);
+        }
+      });
+  
+      // Prepare notification message
+      const message = {
+        title: 'Notification Title',
+        body: 'Notification Body',
+        data:{
+          lon:userlon,
+          lat:userlat,
+        }
 
+      };
+  
+      // Send notifications to each push token
+      for (const pushToken of pushTokens) {
+        await sendPushNotification(pushToken, message);
+      }
+  
+      console.log('Notifications sent successfully to all push tokens');
+    } catch (error) {
+      console.error('Error sending notifications:', error);
+    }
+  };
+  
+  const sendPushNotification = async (pushToken, message) => {
+    try {
+      // Prepare notification object
+      const notification = {
+        to: pushToken,
+        sound: 'default',
+        title: message.title,
+        body: message.body,
+        data:message.data
+      };
+  
+      // Send notification
+      await fetch('https://exp.host/--/api/v2/push/send', {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Accept-encoding': 'gzip, deflate',
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(notification),
+      });
+  
+      console.log('Notification sent successfully to:', pushToken);
+    } catch (error) {
+      console.error('Error sending notification:', error);
+    }
+  };
   const SaveDataFireBase =  async() => {
     
     if(selectedBloodType && userlat && userlon &&  name ){
@@ -50,11 +119,16 @@ await addDoc(collection(db,'BloodRequests'),{
   PatientName: name,
   UserId: userid,
   Status:'Waiting',
-  LocaHash:hash
+  LocaHash:hash,
+  DonatedUser:'',
+  Description:'heeeeeeeeeeeeeeeeeeeelo',
+ 
+
   
 }).then(()=>{
   showToast('Request sent successfully')
   setName('')
+  sendNotificationToAll()
   
  
   setLoading(false)
@@ -75,7 +149,7 @@ await addDoc(collection(db,'BloodRequests'),{
     }
   }
   
-  
+
   
  
  
@@ -110,8 +184,10 @@ await addDoc(collection(db,'BloodRequests'),{
   });
 
   return (
+    
     <View style={styles.container}>
-      <View>
+      <View >
+      <View  >
         <Text style={{ fontFamily: 'Rubik-Medium', fontSize: 20, textAlign: 'center' }}>Please fill out the patient information</Text>
         <Text style={{ fontFamily: 'Rubik-Medium', fontSize: 10, textAlign: 'center', color: 'grey' }}>To update the status of your previous orders, hold click their marker</Text>
       </View>
@@ -132,7 +208,9 @@ await addDoc(collection(db,'BloodRequests'),{
                 />
                 </>}
                 </View>
+                </View>
     </View>
+    
   );
 }
 
@@ -154,8 +232,8 @@ const styles = StyleSheet.create({
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
     backgroundColor: 'white',
-    height: '100%',
-    padding: 10
+    
+    padding: 10,
   },
   input: {
     width: '100%',

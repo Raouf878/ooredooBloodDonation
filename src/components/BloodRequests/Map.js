@@ -7,7 +7,7 @@ import { useSelector } from 'react-redux'
 import { selectUserId } from '../../redux/slices/Credentials'
 import { useDispatch } from 'react-redux'
 import { getUserLat, getUserLon, getUserSearchLon, getUserSrachLat, setUserSearchLat, setUserSearchLon } from '../../redux/slices/Location'
-import { addDoc, collection, query, where, onSnapshot } from 'firebase/firestore'
+import { addDoc,doc, collection, query,deleteDoc, where, onSnapshot, updateDoc } from 'firebase/firestore'
 import { db } from '../../../FirebaseConfig'
 import { Actionsheet,Button } from "native-base";
 import { RubikMediumFont,RubikLightFont } from '../../utils/Fontexporter'
@@ -63,7 +63,7 @@ const Map = () => {
     })
   }
   const handleAnnotationSelect = (feature) => {
-  
+  console.log(feature.properties);
     const parts = feature.properties.id.split('/'); // Split the ID string by '/'
     if (parts.length === 2) { // Ensure there are two parts
       setFirstPart(parts[0]); // Set the first part
@@ -80,6 +80,42 @@ const Map = () => {
   const HidePopUP = () => {
     setShowActionSheet(false);
   };
+  const DelteUser=async()=>{
+    const documentId = firstPart
+    console.log(documentId);
+    const documentRef = doc(db,'BloodRequests',documentId)
+    try {
+      await deleteDoc(documentRef);
+      console.log("Document successfully updated!");
+    } catch (error) {
+      console.error("Error updating document: ", error);
+    }}
+    const founddonor=async()=>{
+      const documentId = firstPart
+      console.log(documentId);
+      const documentRef = doc(db,'BloodRequests',documentId)
+      const newData={
+        Status:'Finished'
+      }
+      try {
+        await updateDoc(documentRef,newData);
+        console.log("Document successfully updated!");
+      } catch (error) {
+        console.error("Error updating document: ", error);
+      }}
+      const Cancel=async()=>{
+        const documentId = firstPart
+        console.log(documentId);
+        const documentRef = doc(db,'BloodRequests',documentId)
+        const newData = {
+          DonatedUser:''
+        };
+        try {
+          await updateDoc(documentRef, newData);
+          console.log("Document successfully updated!");
+        } catch (error) {
+          console.error("Error updating document: ", error);
+        }}
 
   return (
     <View style={styles.container}>
@@ -123,7 +159,7 @@ const Map = () => {
               <Text style={{fontFamily:'Rubik-Light'}}>Name:Abdelkader belmehdi</Text>
               <Text style={{fontFamily:'Rubik-Light'}}>Phone Number:0795960972</Text>
               <Text style={{fontFamily:'Rubik-Light'}}>Blood Type:A+ <Text style={{color:'grey'}}>(compatible)</Text></Text>
-              <TouchableOpacity><Text style={{textAlign:'right', fontFamily:'Rubik-Medium'}}>Cancel Donor</Text></TouchableOpacity>
+              <TouchableOpacity onPress={Cancel}><Text style={{textAlign:'right', fontFamily:'Rubik-Medium'}}>Cancel Donor</Text></TouchableOpacity>
             </View>
             <View style={{display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center', marginTop:14}}>
             <CustomButton
@@ -131,13 +167,14 @@ const Map = () => {
                   colors={['#FF0000', '#B22222']}
                   buttonStyle={styles.signup}
                   textStyle={styles.bloodtext}
+                  onPress={DelteUser}
                   />
                   <CustomButton
                   buttonText="Found Donor "
                   colors={['#50C878', '#2AAA8A']}
                   buttonStyle={styles.signup}
                   textStyle={styles.bloodtext}
-                  
+                  onPress={founddonor}
                   />
             </View>
            

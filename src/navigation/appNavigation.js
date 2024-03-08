@@ -4,6 +4,8 @@ import { NavigationContainer } from "@react-navigation/native";
  import { useDispatch,useSelector } from "react-redux";
 import{FIREBASE_AUTH} from '../../FirebaseConfig'
  import { setUserid } from "../redux/slices/Credentials";
+ import { TransitionPresets } from '@react-navigation/stack';
+
  import {selectUserId} from "../redux/slices/Credentials";
 import Home from "../screens/Home";
 import Login from "../screens/Login";
@@ -26,8 +28,12 @@ export default function AppNavigation(){
     })
     if(credentials){
         return (
-            <NavigationContainer>
-            <Stack.Navigator initialRouteName="Home">
+            <NavigationContainer >
+            <Stack.Navigator initialRouteName="Home" screenOptions={
+              {
+                ...TransitionPresets.And
+              }
+            }>
                 <Stack.Screen options={{headerShown:false}} name="Home" component={Home}/>
                 <Stack.Screen  name="MoneyDonation" options={{title:'',
              headerShadowVisible: false,}} component={MoneyDonation}/>

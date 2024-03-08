@@ -7,6 +7,7 @@ import AddDonation from '../components/BloodRequests/AddDonation'
 
 const BloodRequest = () => {
   return (
+    
     <View style={styles.container}>
     <Map/>
     <View style={styles.createRequestContainer}>
@@ -23,7 +24,7 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
     flexDirection: 'column',
-    position: 'relative',
+   
   },
   mapContainer: {
     flex: 0.65,
@@ -33,7 +34,7 @@ const styles = StyleSheet.create({
   createRequestContainer: {
     flex: 0.35, // CreateRequest container occupies 35% of the screen's height
     position:'absolute',
-    height: '35%',
+    height: 'auto',
     width:'100%',
     bottom:0
   },
