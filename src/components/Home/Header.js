@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View, Image,Permissions,ActivityIndicator} from 'react-native'
+import { StyleSheet, Text, View, Image,Permissions,ActivityIndicator, TouchableOpacity} from 'react-native'
 import React, { useEffect, useState } from 'react';
 import * as Location from 'expo-location';
 import { useFonts } from 'expo-font';
@@ -7,11 +7,14 @@ import { setUserLat,setUserLon } from '../../redux/slices/Location';
 import CircleSkeleton from '../Skeletons/CircleSkeleton';
 import { Avatar } from "native-base";
 import { selectedFirstName,selectUserLoading,selectLoadingStates,setLoadingState } from '../../redux/slices/Credentials';
+import Setting from '../../screens/setting';
+import { useNavigation } from '@react-navigation/native';
 
 const profileimage = require('../../assets/images/Profile_Picture.png');
 
 const Header = () => {
  const dispatch=useDispatch();
+ const navigation = useNavigation();
   const [fontsLoaded] = useFonts({
     "Rubik-Medium": require("../../assets/fonts/Rubik-static/Rubik-Medium.ttf"),
     "Rubik-Light": require("../../assets/fonts/Rubik-static/Rubik-Light.ttf"),
@@ -62,13 +65,16 @@ const userloading=useSelector(selectUserLoading)
       {userloading ? (
   <CircleSkeleton/>
 ) : (
-  <Avatar bg="indigo.500" mr="1">
+  <TouchableOpacity onPress={()=>navigation.navigate(Setting)}>
+  <Avatar bg="indigo.500" mr="1" onPress={{}}>
     {name && name.length >= 2 ? (
       name[0] + name[1]
     ) : (
       name && name[0]
     )}
+    
   </Avatar>
+  </TouchableOpacity>
 )}
       
       

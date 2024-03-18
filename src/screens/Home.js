@@ -32,18 +32,20 @@ const Home = () => {
                 shouldSetBadge: true,
             };
         } else {
+          console.log('no notifi');
             // If the notification should not be shown, return appropriate settings
             return {
                 shouldShowAlert: false,
                 shouldPlaySound: false,
                 shouldSetBadge: false,
+                
             };
         }
     },
 });
 const shouldShowNotification = (notification) => {
   console.log('rghjmlk');
-    const radiusInM = 5 * 1000// 100 kilometers
+    const radiusInM = 20 * 1000// 100 kilometers
   let isValid=false
     // Assuming notification contains lat and lon properties
     if (!notification || !notification.request || !notification.request.content || !notification.request.content.data) {
@@ -96,7 +98,7 @@ useEffect(() => {
     <SafeAreaView style={styles.container}>
           <Header />
           <Body />
-          <RecentActivity />
+          
 
     </SafeAreaView>
   );

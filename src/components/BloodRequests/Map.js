@@ -29,6 +29,7 @@ const Map = () => {
   const userlat = useSelector(getUserLat)
   const dispatch = useDispatch()
   const [bloodrequests, setBloodrequests] = useState([])
+  const [donators, setDonators] = useState([])
   const [coordinates] = useState([userlon, userlat])
   RubikMediumFont()
   RubikLightFont()
@@ -62,12 +63,35 @@ const Map = () => {
      
     })
   }
+  const GetDonator = () => {
+    console.log('d^m^df^dmf',bloodrequests[secondPart]?.data?.DonatedUser);
+    if (bloodrequests[secondPart]?.data?.DonatedUser) {
+      
+    
+    const q = query(collection(db, "UsersData"), where("__name__", "==", `${bloodrequests[secondPart]?.data?.DonatedUser}`))
+    return onSnapshot(q, (querySnapshot) => {
+      const requests = []
+      querySnapshot.forEach((doc) => {
+        const requestData = {
+          id: doc.id,
+          data: doc.data()
+        };
+        requests.push(requestData);
+      })
+      setDonators(requests)
+      console.log(requests);
+      
+      
+     
+    })}else{return null}
+  }
   const handleAnnotationSelect = (feature) => {
   console.log(feature.properties);
     const parts = feature.properties.id.split('/'); // Split the ID string by '/'
     if (parts.length === 2) { // Ensure there are two parts
       setFirstPart(parts[0]); // Set the first part
       setSecondPart(parts[1]);
+      GetDonator()
       ShowPopUP() // Set the second part
     } else {
       console.error('Invalid ID format:',  feature.properties.id);
@@ -75,6 +99,7 @@ const Map = () => {
   }
   const ShowPopUP = () => {
     setShowActionSheet(true);
+    
   };
 
   const HidePopUP = () => {
@@ -156,9 +181,9 @@ const Map = () => {
             <TruncatedText text={'My daught had an accident so i really need your help to get blood for her'} maxLength={60}/>
             <Text style={{fontFamily:'Rubik-Medium', fontSize:22}}>Potential Donors</Text>
             <View style={{borderWidth:1,borderColor:'black',borderRadius:15,height:100,padding:7}}>
-              <Text style={{fontFamily:'Rubik-Light'}}>Name:Abdelkader belmehdi</Text>
-              <Text style={{fontFamily:'Rubik-Light'}}>Phone Number:0795960972</Text>
-              <Text style={{fontFamily:'Rubik-Light'}}>Blood Type:A+ <Text style={{color:'grey'}}>(compatible)</Text></Text>
+              <Text style={{fontFamily:'Rubik-Light'}}>Name:{donators[0]?.data?.FirstName} {donators[0]?.data?.LastName}</Text>
+              <Text style={{fontFamily:'Rubik-Light'}}>Phone Number:{donators[0]?.data?.PhoneNumber}</Text>
+              <Text style={{fontFamily:'Rubik-Light'}}>Blood Type:{donators[0]?.data?.bloodType} <Text style={{color:'grey'}}>(compatible)</Text></Text>
               <TouchableOpacity onPress={Cancel}><Text style={{textAlign:'right', fontFamily:'Rubik-Medium'}}>Cancel Donor</Text></TouchableOpacity>
             </View>
             <View style={{display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center', marginTop:14}}>

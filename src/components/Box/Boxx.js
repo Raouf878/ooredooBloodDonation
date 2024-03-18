@@ -44,11 +44,7 @@ const Boxx = ({data,CancelText,buttonStyle,textStyle,ButtonColors} ) => {
             borderColor: 'black',
             borderRadius: 8,
             marginBottom: 10,
-            elevation: 5,
-            shadowColor: 'black',
-            shadowOffset: { width: 0, height: 2 },
-            shadowOpacity: 0.2,
-            shadowRadius: 2,
+            
           }}
         >
           <View >

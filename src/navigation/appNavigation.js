@@ -13,19 +13,21 @@ import Signup from "../screens/Signup";
 import MoneyDonation from "../screens/MoneyDonation";
 import BloodRequest from "../screens/BloodRequest";
 import BloodRequestNearby from "../screens/BloodRequestNearby";
+import Setting from "../screens/setting";
 import { CustomHeader } from "../components/HeaderMap/CustomHeader";
 
 
 const Stack=createNativeStackNavigator();
 
 export default function AppNavigation(){
+  onAuthStateChanged(FIREBASE_AUTH,u=>{
+    console.log(u.uid);
+    dispatch(setUserid(u.uid));
+})
     const credentials=useSelector(selectUserId)
     const dispatch=useDispatch()
     
-    onAuthStateChanged(FIREBASE_AUTH,u=>{
-        console.log(u.uid);
-        dispatch(setUserid(u.uid));
-    })
+    
     if(credentials){
         return (
             <NavigationContainer >
@@ -45,7 +47,9 @@ export default function AppNavigation(){
           headerTransparent:true
         }}
         
+        
       />
+      <Stack.Screen name="Setting" component={Setting}/>
       <Stack.Screen options={{ title:'',
           headerTransparent:true}} name="BloodRequestNearby" component={BloodRequestNearby}/>
                 

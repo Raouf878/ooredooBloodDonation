@@ -129,20 +129,30 @@ const onButtonPress=async()=>{
         {/* Additional Views */}
       </View>
       <View style={{borderWidth:1,borderColor:'black',flex:1,borderRadius:15,marginTop:15}}>
-        <View style={{margin:8}}>
+        <View style={{margin:8,}}>
         <Text style={{fontFamily:'Rubik-Medium',fontSize:24}}>Recent Donations</Text>
        
         </View>
 
-        <ScrollView>
-        { DonationDataLoading ? <ActivityIndicator size="small" color="grey" />
-      :<> 
-        <View style={{padding:10}}>
-        <Boxx data={bloodrequests} CancelText={'Cancel Donation X'} buttonStyle={styles.signup} textStyle={styles.bloodtext} ButtonColors={['#eb1a22','#e36f1e']} />
         
-        </View>
-        </>}
-        </ScrollView>
+        {
+  DonationDataLoading ? (
+    <ActivityIndicator size="small" color="grey" />
+  ) : (
+    bloodrequests.length === 0 ? (
+      <View style={{ flex: 1, justifyContent:'flex-end', alignItems: 'center' }}>
+      <Image source={require('../../assets/images/Blood/data-cuate.png') } style={{resizeMode:'contain',height:'100%' }} />
+      </View>
+    ) : (
+      <ScrollView>
+      <View style={{padding: 10}}>
+        <Boxx data={bloodrequests} CancelText={'Cancel Donation X'} buttonStyle={styles.signup} textStyle={styles.bloodtext} ButtonColors={['#eb1a22','#e36f1e']} />
+      </View>
+      </ScrollView>
+    )
+  )
+}
+        
         
        
        

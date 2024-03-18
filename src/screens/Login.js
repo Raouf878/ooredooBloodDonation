@@ -8,7 +8,7 @@ import Loginaccount from '../components/LoginPage/Loginaccount';
 
 const Login = () => {
   return (
-    <SafeAreaView style={{backgroundColor:'white',height:'100%',padding:10}}>
+    <SafeAreaView style={{height:'100%',padding:10}}>
     <WelcomeLogin/>
     <Loginaccount/>
     </SafeAreaView>

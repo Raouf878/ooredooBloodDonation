@@ -37,13 +37,15 @@ const AddDonation = () => {
   const [CompatibleBloodTypes,setCompatibleBloodType]=useState([])
   const [bloodrequest,setBloodrequests]=useState([])
   const [AllPushTokens,setAllPushTokens]=useState([])
+  const [desc,setDesc]=useState('')
+ 
   
   
   const sendNotificationToAll = async () => {
     try {
       const comptValues=await getCompatibleBloodTypes(selectedBloodType)
       console.log(comptValues);
-      const querySnapshot = await getDocs(query(collection(db, 'UsersData'), where('bloodType', 'in', comptValues)));
+      const querySnapshot = await getDocs(query(collection(db, 'UsersData'), where('bloodType', 'in', comptValues),where('__name__','!=',userid)));
      console.log(querySnapshot);
       // Extract push tokens from the documents
       const pushTokens = [];
@@ -57,8 +59,8 @@ const AddDonation = () => {
   
       // Prepare notification message
       const message = {
-        title: 'Notification Title',
-        body: 'Notification Body',
+        title: 'someone need you blood',
+        body: 'Please check recent requests',
         data:{
           lon:userlon,
           lat:userlat,
@@ -106,7 +108,7 @@ const AddDonation = () => {
   };
   const SaveDataFireBase =  async() => {
     
-    if(selectedBloodType && userlat && userlon &&  name ){
+    if(selectedBloodType && userlat && userlon &&  name &&desc ){
       setLoading(true)
 
       
@@ -121,7 +123,7 @@ await addDoc(collection(db,'BloodRequests'),{
   Status:'Waiting',
   LocaHash:hash,
   DonatedUser:'',
-  Description:'heeeeeeeeeeeeeeeeeeeelo',
+  Description:desc,
  
 
   
@@ -192,9 +194,11 @@ await addDoc(collection(db,'BloodRequests'),{
         <Text style={{ fontFamily: 'Rubik-Medium', fontSize: 10, textAlign: 'center', color: 'grey' }}>To update the status of your previous orders, hold click their marker</Text>
       </View>
       <View>
-        <TextInput placeholder="Enter your first name" style={styles.input} value={name}onChangeText={(text) => setName(text)} />
-        <TextInput placeholder="Pick your address" style={styles.input} value={address}  /> 
+        <TextInput placeholder="Enter your first name" style={styles.input} value={name} onChangeText={(text) => setName(text)} />
+        <TextInput placeholder="Pick your address" style={styles.input} value={address}  />
+        <TextInput placeholder="Please write a small description about your case" style={styles.inputdesc} onChangeText={(text) => setDesc(text)}  /> 
         <BloodTypePicker data={itemData} selectedBloodType={selectedBloodType} onSelectBloodType={setSelectedBloodType} />
+        
       </View>
       <View style={{display:'flex',alignItems:'center',justifyContent:'center'}}>
       { loading ? <ActivityIndicator size="large" color="#0000ff"/>
@@ -238,6 +242,17 @@ const styles = StyleSheet.create({
   input: {
     width: '100%',
     height: 35,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginTop: 10,
+    paddingHorizontal: 20,
+    backgroundColor: 'white',
+    borderRadius: 5,
+    fontFamily: 'Rubik-Medium',
+  },
+  inputdesc: {
+    width: '100%',
+    height: 75,
     borderColor: 'gray',
     borderWidth: 1,
     marginTop: 10,

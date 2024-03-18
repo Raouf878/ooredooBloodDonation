@@ -7,7 +7,7 @@ import Createaccount from '../components/signupage/Createaccount';
 
 const Signup = () => {
   return (
-    <SafeAreaView style={[(tw`h-full w-full p-4`),{backgroundColor:'#f8e4e4'}]}>
+    <SafeAreaView style={[(tw`h-full w-full p-4`)]}>
     <WelcomeTitle/>
     <Createaccount/>
     </SafeAreaView>

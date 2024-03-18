@@ -10,7 +10,7 @@ const WelcomeLogin = () => {
         });
   return (
     <View style={styles.container}>
-      <Image source={require('../../assets/images/Blood/logo.png')} style={styles.image}></Image>
+      <Image  source={require('../../assets/images/Blood/donateme.png')}  style={styles.image}></Image>
       <Text style={styles.instructions}>Login to your account</Text>
     </View>
   )

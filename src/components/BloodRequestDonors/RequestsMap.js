@@ -5,7 +5,7 @@ import Mapbox, { LineLayer, LocationPuck, ShapeSource } from '@rnmapbox/maps'
 import { useSelector } from 'react-redux';
 import { getUserLat, getUserLon } from '../../redux/slices/Location';
 import { PointAnnotation } from '@rnmapbox/maps';
-import { collection, query, where, onSnapshot,updateDoc,doc,getDoc,getDocs } from 'firebase/firestore'
+import { collection, query, where, onSnapshot,updateDoc,doc,getDocs } from 'firebase/firestore'
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { GeoPoint } from 'firebase/firestore';
 import { db } from '../../../FirebaseConfig'
@@ -19,13 +19,14 @@ import BoxxCarousel from '../Box/BoxxCarousel';
 import { Dimensions } from 'react-native';
 import { Directions } from 'react-native-gesture-handler';
 import LinearGradient from 'react-native-linear-gradient';
-import { selectUserId } from '../../redux/slices/Credentials';
+import { selectUserId, selectedBloodType } from '../../redux/slices/Credentials';
 import { selectedFirstName } from '../../redux/slices/Credentials';
 import { Button,Platform } from 'react-native';
 import * as Device from 'expo-device';
 import sendPushNotification from '../../utils/SendNotification';
 import Constants from 'expo-constants';
 import * as Notifications from 'expo-notifications';
+import {BloodDonorCmpta} from '../../utils/BloodCompt'
 const baseUrl = 'https://api.mapbox.com/directions/v5/driving-traffic';
 
 Mapbox.setAccessToken('pk.eyJ1IjoicmFvdWY5ODgiLCJhIjoiY2xzbjZod3JnMDB0NTJxbzkwZm9oMXZvdCJ9.hZVOTvYRd5kEwvQqRILm3g')
@@ -50,9 +51,10 @@ const RequestMap=()=>{
   const [southwest, setSouthwest] = useState([])
   const [coordinates] = useState([userlon, userlat])
   const [userPushToken,setUserPushToken]=useState('')
+  const [originaluser,setOriginalUser]=useState([])
   const userid=useSelector(selectUserId)
   const selectedUserFirstName = useSelector(selectedFirstName);
-
+  const userbloodtype=useSelector(selectedBloodType)
 const GenerateNearbyRequests = (param) => {
   if (param) {
     setNortheast(new GeoPoint(param.properties.bounds.ne[1], param.properties.bounds.ne[0]))
@@ -70,18 +72,19 @@ useEffect(() => {
   }
 }, [trueEffect]);
 
-const GetUserRequests = () => {
+const GetUserRequests = async() => {
+  const comptValues=await BloodDonorCmpta(userbloodtype)
   const radiusInM = 50 * 1000;
   const bounds = geohashQueryBounds([centerlat, centerlon], radiusInM);
   const promises = [];
   for (const b of bounds) {
     const q = query(
-      collection(db, 'BloodRequests'),where('Status','==','Waiting'),where('DonatedUser',"==",""));
+      collection(db, 'BloodRequests'),where('Status','==','Waiting'),where('DonatedUser',"==",""),where('UserId','!=',userid),where('NeededBloodType','in',comptValues));
     promises.push(onSnapshot(q, (snapshot) => {
       const matchingDocs = []
       snapshot.forEach((doc) => {
-        const lat = doc.get('lat');
-        const lng = doc.get('lon');
+        const lat = doc.get('lat')
+        const lng = doc.get('lon')
         const distanceInKm = distanceBetween([lat, lng], [centerlat, centerlon]);
         const distanceInM = distanceInKm * 1000;
      if (distanceInM <= radiusInM) {
@@ -104,13 +107,29 @@ const GetUserRequests = () => {
 
 
 
-const handleAnnotationSelect = (feature) => {
-console.log(feature.properties.id);
+const handleAnnotationSelect = async (feature) => {
+  console.log(feature.properties.id);
   const parts = feature.properties.id.split('/'); // Split the ID string by '/'
   if (parts.length === 2) { // Ensure there are two parts
-    setFirstPart(parts[0]); // Set the first part
-    setSecondPart(parts[1]);
-    ShowPopUP() // Set the second part
+    const firstPart = parts[0];
+    setFirstPart(firstPart); // Set the first part
+    setSecondPart(parts[1]); // Set the second part
+    ShowPopUP();
+console.log();
+    try {
+     const usserid=bloodrequests[parts[1]].data.UserId
+      const q=query(collection(db,'UsersData'),where('__name__','==',usserid))
+      await getDocs(q)
+      .then((querySnapshot)=>{
+        querySnapshot.forEach((doc)=>{
+          setOriginalUser(doc.data())
+          
+        })
+      })
+      
+    } catch (error) {
+      console.error('Error fetching user information:', error);
+    }
   } else {
     console.error('Invalid ID format:',  feature.properties.id);
   }
@@ -133,25 +152,26 @@ const sendNotification=async()=>{
       querySnapshot.forEach((doc) => {
         setUserPushToken(doc.data().PushToke);
         console.log(doc.data().PushToke);
+        const message = {
+          title: 'لقد وجدنا متبرع',
+          body: ` يريد التبرع ${selectedUserFirstName}` ,
+           data:{
+            lon:userlon,
+            lat:userlat
+           }
+    
+        };
+        sendPushNotification(doc.data().PushToke,message)
       });
     })
     .catch((error) => {
       console.error('Error getting documents: ', error);
     });
-    const message = {
-      title: 'لقد وجدنا متبرع',
-      body: ` يريد التبرع ${selectedUserFirstName}` ,
-       data:{
-        lon:userlon,
-        lat:userlat
-       }
-
-    };
-    sendPushNotification(userPushToken,message)
+  
 
 }
 const SaveDonation=async()=>{
-
+  setShowActionSheet(false);
 const documentId = firstPart;
 console.log(documentId);
 const documentRef = doc(db,'BloodRequests',documentId)
@@ -161,7 +181,10 @@ const newData = {
 try {
   await updateDoc(documentRef, newData);
   console.log("Document successfully updated!");
+  
   sendNotification()
+  
+  
 } catch (error) {
   console.error("Error updating document: ", error);
 }
@@ -177,10 +200,10 @@ return (
           scaleBarEnabled={false}
           pitchEnabled={false}
           
-          zoomEnabled={false}
+          zoomEnabled={true}
           onMapIdle={(result) => GenerateNearbyRequests(result)}
         >
-          <Mapbox.Camera zoomLevel={14} centerCoordinate={coordinates} animationMode="flyTo" animationDuration={4500} />
+          <Mapbox.Camera zoomLevel={14} centerCoordinate={coordinates} animationMode="flyTo" animationDuration={4500} minZoomLevel={14}  />
 
   
        {bloodrequests.map((request, index) => (
@@ -205,10 +228,10 @@ return (
         <View>
           <Text style={{fontFamily:'Rubik-Medium', fontSize:22}}>Donation Details</Text>
           <Text style={{fontFamily:'Rubik-Light'}}>Patient Name: {bloodrequests[secondPart]?.data?.PatientName}</Text>
-          <Text style={{fontFamily:'Rubik-Light'}}>Phone Number:0795960972</Text>
-            <Text style={{fontFamily:'Rubik-Light'}}>Blood Type:A+ <Text style={{color:'grey'}}>(compatible)</Text></Text>
+          <Text style={{fontFamily:'Rubik-Light'}}>Phone Number:{originaluser?.PhoneNumber}</Text>
+            <Text style={{fontFamily:'Rubik-Light'}}>Blood Type:{bloodrequests[secondPart]?.data?.NeededBloodType} <Text style={{color:'grey'}}>(compatible)</Text></Text>
           <Text style={{fontFamily:'Rubik-Light'}}>Description:</Text>
-          <TruncatedText text={ bloodrequests[secondPart]?.data?.Description} maxLength={60}/>
+          <TruncatedText text={bloodrequests[secondPart]?.data?.Description} maxLength={60}/>
          
           <View style={{display:'flex', flexDirection:'row', justifyContent:'center', alignItems:'center', marginTop:14}}>
          
